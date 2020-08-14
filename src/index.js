@@ -3,19 +3,23 @@ import ReactDOM from 'react-dom'
 import './index.css'
 import App from './App'
 import Connexion from './components/Connexion'
+import NotFound from './components/NotFound'
 import * as serviceWorker from './serviceWorker'
 
-import { BrowserRouter, Route, Switch } from 'react-router-dom'
-import NotFound from './components/NotFound'
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch
+} from 'react-router-dom'
 
 const Root = () => (
-    <BrowserRouter>
-        <Switch>
-            <Route exact path='/' component={Connexion}/>
-            <Route path='/pseudo/:pseudo' component={App}/>
-            <Route component= {NotFound}/>
-        </Switch>
-    </BrowserRouter>
+  <Router>
+    <Switch>
+      <Route exact path='/' component={Connexion} />
+      <Route path='/pseudo/:pseudo' component={App} />
+      <Route component={NotFound} />
+    </Switch>
+  </Router>
 )
 
 ReactDOM.render(<Root />, document.getElementById('root'))

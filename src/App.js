@@ -1,89 +1,74 @@
-import React, { Component, createRef } from 'react'
+import React, { Component } from 'react'
+// CSS
 import './App.css'
-import './animations.css'
 
-import Formulaire from './components/Formulaire'
-import Message from './components/Message'
+import Header from './components/Header'
+import Admin from './components/Admin'
+import Card from './components/Card'
+import recettes from './recettes'
 
-// Firebase
+
+//Firebase
 import base from './base'
 
-//Animation
-import {
-  CSSTransition,
-  TransitionGroup
-} from 'react-transition-group'
+
 
 class App extends Component {
   state = {
-    messages : {},
-    pseudo : this.props.match.params.pseudo
+    pseudo: this.props.match.params.pseudo,
+    recettes: {}
   }
 
+  componentDidMount(){
+    this.ref = base.syncState(`/${this.state.pseudo}/recettes`, { 
+    context: this,
+    state: 'recettes'
+  })
+}
 
-  componentDidUpdate() {
-    const ref = this.messageRef.current
-    ref.scrollTop = ref.scrollHeight
-  }
+componentWillUnmount() {
+  base.removeBinding(this.ref)
+}
 
-  messageRef = createRef()
+ajouterRecette = recette => {
+  const recettes = { ...this.state.recettes }
+  recettes[`recette-${Date.now()}`] = recette
+  this.setState({ recettes })
+}
 
-  componentDidMount () {
-    base.syncState('/', {
-      context: this,
-      state: 'messages'
-    })
-  }
+majRecette = (key, newRecette) => {
+  const recettes = { ...this.state.recettes }
+  recettes[key] = newRecette
+  this.setState({ recettes })
+}
 
-  addMessage = message => {
-    const messages = { ...this.state.messages }
-    messages[`message-${Date.now()}`] = message 
-    Object
-      .keys(messages)
-      .slice(0, -10)
-      .forEach(key => {
-        messages[key] = null
-      })
+supprimerRecette = key => {
+  const recettes =  { ...this.state.recettes }
+  recettes[key] = null 
+  this.setState({ recettes })
+}
 
-    this.setState({ messages })
-  }
 
-  isUser = pseudo => pseudo === this.state.pseudo
+
+  chargerExemple = () => this.setState({ recettes })
 
   render () {
-
-    const messages = Object
-      .keys(this.state.messages)
-      .map(key => (
-        <CSSTransition
-        timeout={600}
-        classNames='fade'
-        key={key}>
-        <Message
-          
-          isUser={this.isUser}
-          message={this.state.messages[key].message}
-          pseudo={this.state.messages[key].pseudo} />
-          </CSSTransition>
-      ))
-
-      console.log(messages)
-
+    const cards = Object.keys(this.state.recettes)
+    .map(key => <Card key={key} details={this.state.recettes[key]}/>)
+    console.log(cards)
     return (
       <div className='box'>
-        <div>
-          <div className='messages' ref= {this.messageRef}>
-            <TransitionGroup className='message'>
-
-              {messages}
-
-            </TransitionGroup>
-          </div>
+        <Header pseudo={this.state.pseudo} />
+        <div className='cards'>
+          { cards }
         </div>
-        <Formulaire
-          length={140}
-          pseudo={this.state.pseudo}
-          addMessage={this.addMessage} />
+        <Admin
+        pseudo = {this.state.pseudo}
+        recettes={this.state.recettes}
+        ajouterRecette={this.ajouterRecette} 
+        majRecette={this.majRecette}
+        supprimerRecette={this.supprimerRecette}
+        chargerExemple={this.chargerExemple} />
       </div>
     )
   }
